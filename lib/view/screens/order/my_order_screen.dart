@@ -1,0 +1,86 @@
+import 'package:flutter/material.dart';
+import 'package:seven/helper/responsive_helper.dart';
+import 'package:seven/localization/language_constrants.dart';
+import 'package:seven/provider/auth_provider.dart';
+import 'package:seven/provider/order_provider.dart';
+import 'package:seven/utill/dimensions.dart';
+import 'package:seven/view/base/app_bar_base.dart';
+import 'package:seven/view/base/not_login_screen.dart';
+import 'package:seven/view/base/web_app_bar/web_app_bar.dart';
+import 'package:seven/view/screens/order/widget/order_button.dart';
+import 'package:seven/view/screens/order/widget/order_view.dart';
+import 'package:provider/provider.dart';
+
+class MyOrderScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final bool _isLoggedIn =
+        Provider.of<AuthProvider>(context, listen: false).isLoggedIn();
+    if (_isLoggedIn) {
+      Provider.of<OrderProvider>(context, listen: false).getOrderList(context);
+    }
+    return Scaffold(
+      appBar: ResponsiveHelper.isMobilePhone()
+          ? null
+          : (ResponsiveHelper.isDesktop(context)
+              ? PreferredSize(
+                  child: WebAppBar(), preferredSize: Size.fromHeight(120))
+              : AppBarBase()) as PreferredSizeWidget?,
+      body: SafeArea(
+        child: _isLoggedIn
+            ? Scrollbar(
+                child: Center(
+                  child: Consumer<OrderProvider>(
+                    builder: (context, orderProvider, child) =>
+                        orderProvider.runningOrderList != null
+                            ? Column(
+                                children: [
+                                  SizedBox(
+                                    width: 1170,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(
+                                          Dimensions.PADDING_SIZE_SMALL),
+                                      child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            OrderButton(
+                                                title: getTranslated(
+                                                    'active', context),
+                                                isActive: true),
+                                            SizedBox(
+                                                width: Dimensions
+                                                    .PADDING_SIZE_SMALL),
+                                            OrderButton(
+                                                title: getTranslated(
+                                                    'past_order', context),
+                                                isActive: false),
+                                          ]),
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child: OrderView(
+                                          isRunning: orderProvider.isActiveOrder
+                                              ? true
+                                              : false))
+                                ],
+                              )
+                            : Center(
+                                child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Theme.of(context).primaryColor))),
+                  ),
+                ),
+              )
+            : NotLoggedInScreen(),
+      ),
+    );
+  }
+}
+// Provider.of<OrderProvider>(context, listen: false).runningOrderList != null ? ResponsiveHelper.isDesktop(context) ? FooterView() : SizedBox() : SizedBox(),
+
+
+
+
