@@ -1,10 +1,4 @@
-import 'dart:io';
-
-import 'package:dio/dio.dart';
-import 'package:seven/data/datasource/remote/dio/logging_interceptor.dart';
-import 'package:seven/helper/responsive_helper.dart';
-import 'package:seven/utill/app_constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../all_export.dart';
 
 class DioClient {
   final String baseUrl;
@@ -16,20 +10,21 @@ class DioClient {
 
   DioClient(
     this.baseUrl,
-    Dio? dioC, {
+    Object object, {
     required this.loggingInterceptor,
     required this.sharedPreferences,
   }) {
     token = sharedPreferences.getString(AppConstants.TOKEN);
     print(token);
-    dio = dioC ?? Dio();
+    dio = Dio();
     dio!
       ..options.baseUrl = baseUrl
-      ..options.connectTimeout =
-          (ResponsiveHelper.isMobilePhone() ? 30000 : 60 * 30000) as Duration?
-      ..options.receiveTimeout =
-          (ResponsiveHelper.isMobilePhone() ? 30000 : 60 * 30000) as Duration?
-      ..httpClientAdapter
+      ..options.connectTimeout = ResponsiveHelper.isMobilePhone()
+          ? const Duration(milliseconds: 30000)
+          : const Duration(minutes: 60)
+      ..options.receiveTimeout = ResponsiveHelper.isMobilePhone()
+          ? const Duration(milliseconds: 30000)
+          : const Duration(minutes: 60)
       ..options.headers = {
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token'
@@ -53,19 +48,18 @@ class DioClient {
         onReceiveProgress: onReceiveProgress,
       );
       return response;
-    } on SocketException catch (e) {
-      throw SocketException(e.toString());
-    } on FormatException catch (_) {
-      throw const FormatException("Unable to process the data");
-    } catch (e) {
-      print('===============${e.toString()}');
-      rethrow;
+    } on DioError catch (e) {
+      if (e.error is FormatException) {
+        throw const FormatException("Unable to process the data");
+      } else {
+        rethrow;
+      }
     }
   }
 
   Future<Response> post(
     String uri, {
-    data,
+    dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
@@ -83,16 +77,18 @@ class DioClient {
         onReceiveProgress: onReceiveProgress,
       );
       return response;
-    } on FormatException catch (_) {
-      throw const FormatException("Unable to process the data");
-    } catch (e) {
-      rethrow;
+    } on DioError catch (e) {
+      if (e.error is FormatException) {
+        throw const FormatException("Unable to process the data");
+      } else {
+        rethrow;
+      }
     }
   }
 
   Future<Response> put(
     String uri, {
-    data,
+    dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
@@ -110,16 +106,18 @@ class DioClient {
         onReceiveProgress: onReceiveProgress,
       );
       return response;
-    } on FormatException catch (_) {
-      throw const FormatException("Unable to process the data");
-    } catch (e) {
-      rethrow;
+    } on DioError catch (e) {
+      if (e.error is FormatException) {
+        throw const FormatException("Unable to process the data");
+      } else {
+        rethrow;
+      }
     }
   }
 
   Future<Response> delete(
     String uri, {
-    data,
+    dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
@@ -133,10 +131,12 @@ class DioClient {
         cancelToken: cancelToken,
       );
       return response;
-    } on FormatException catch (_) {
-      throw const FormatException("Unable to process the data");
-    } catch (e) {
-      rethrow;
+    } on DioError catch (e) {
+      if (e.error is FormatException) {
+        throw const FormatException("Unable to process the data");
+      } else {
+        rethrow;
+      }
     }
   }
 }

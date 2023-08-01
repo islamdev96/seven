@@ -23,6 +23,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyD1FoCntTA_UGIdKf37qgfEMSWMNb7wDkc"/>
 
+            
+
 
 
         <!-- Don't delete the meta-data below.
